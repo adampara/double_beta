@@ -1,5 +1,5 @@
 """
-ls *scan double beta and single electron events
+scan double beta and single electron events
 
 """
 
@@ -10,6 +10,7 @@ import numpy as np
 import argparse
 import os
 import pickle
+
 
 def scan_inp():
     """
@@ -25,6 +26,8 @@ def scan_inp():
                         default='blind',dest='scan_type')
     parser.add_argument("-star", type=int, help="first event",
                         default=0,dest='first_ev')
+    parser.add_argument("-class_file", type=str, help="classfication file",
+                        default='class.res',dest='class_file')
     
     ar = parser.parse_args()
     
@@ -32,9 +35,11 @@ def scan_inp():
     print '  files to analyze               ',ar.f_type
     print '  scan type                      ',ar.scan_type
     print '  First event                    ',ar.first_ev
+    if ar.scan_type == 'blind':
+        print '  Classification file            ',ar.class_file
     print '---------------------------------------------------------------------'
     
-    return ar.f_type, ar.scan_type, ar.first_ev
+    return ar.f_type, ar.scan_type, ar.first_ev, ar.class_file
 
 
 
@@ -43,7 +48,7 @@ def scan_inp():
 # Main loop
 # ---------------------------------------------------------------------------
 
-f_type, scan_type, first_ev = scan_inp()
+f_type, scan_type, first_ev, class_file = scan_inp()
 
 filelist ={
       'signal': 'double_beta_files',
@@ -56,6 +61,9 @@ nlist = pickle.load( open('nexus_'+filelist[f_type], "rb" ) )
 debug = True
 evt = 0
 
+if scan_type == 'blind':
+    classified_files = open(class_file,"a")
+    
 for file in nlist[first_ev:]:
 
     if scan_type != 'blind':
@@ -73,7 +81,7 @@ for file in nlist[first_ev:]:
 
     ax3 = fig.add_subplot(111, projection='3d');
 
-    psize = 5000*E
+    psize = 5000*E 
     s3 = ax3.scatter(x,y,z,s=psize)
 
     if scan_type != 'blind':
